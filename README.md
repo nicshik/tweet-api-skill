@@ -16,7 +16,7 @@ It is designed for people who want:
 
 - `SKILL.md` for agent environments that support skill-style workflows
 - `agents/openai.yaml` for UI metadata
-- `references/` with quickstart and endpoint notes
+- `references/` with quickstart, human-readable notes, and research examples
 - `scripts/` with Python helpers
 - `bin/xread` and `bin/xapi` terminal wrappers
 - `install_portable.sh` for install and update
@@ -58,6 +58,57 @@ Call any documented endpoint:
 ```bash
 xapi --method GET --path /oapi/my/info --query-json '{}'
 ```
+
+## Practical Workflows
+
+Read a tweet or X Article and then analyze it:
+
+```bash
+xread "https://x.com/ZenithTON/status/2046570503801119055"
+```
+
+Look up the author profile:
+
+```bash
+xapi --method GET --path /twitter/user/info --query-json '{"userName":"ZenithTON"}'
+```
+
+Pull the author's recent tweets:
+
+```bash
+xapi --method GET --path /twitter/user/last_tweets --query-json '{"userName":"ZenithTON","includeReplies":false}'
+```
+
+Inspect replies:
+
+```bash
+xapi --method GET --path /twitter/tweet/replies/v2 --query-json '{"tweetId":"2046570503801119055","queryType":"Latest"}'
+```
+
+Inspect quote tweets:
+
+```bash
+xapi --method GET --path /twitter/tweet/quotes --query-json '{"tweetId":"2046570503801119055","includeReplies":false}'
+```
+
+Search accounts by topic:
+
+```bash
+xapi --method GET --path /twitter/user/search --query-json '{"query":"TON AI"}'
+```
+
+Search tweets by topic:
+
+```bash
+xapi --method GET --path /twitter/tweet/advanced_search --query-json '{"query":"\"AI agents\" Telegram TON","queryType":"Top"}'
+```
+
+For more detailed examples, see:
+
+- `references/research_examples.md`
+- `references/что_умеет_инструмент.md`
+- `references/api_quickstart.md`
+- `references/endpoint_catalog.md`
 
 ## API Key Handling
 
