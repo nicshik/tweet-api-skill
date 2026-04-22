@@ -1,7 +1,7 @@
 ---
 name: twitterapi_x_reader
 description: Portable workflow for using twitterapi.io official endpoints for X or Twitter reads, articles, search, user data, communities, lists, spaces, trends, streams, webhook rules, and explicitly requested write actions.
-license: Private-Internal
+license: MIT
 compatibility:
   runtimes:
     - codex
@@ -13,9 +13,9 @@ metadata:
   capability_taxonomy_ids:
     - cap.research.social_media_fetch
     - cap.research.twitter_article_parse
-  distribution_scope: private
+  distribution_scope: public
   invocation_strategy: explicit
-  version: v0.2
+  version: v0.3
   source_of_truth: github:nicshik/tweet-api-skill
 ---
 
