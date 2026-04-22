@@ -13,7 +13,10 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-import certifi
+try:
+    import certifi
+except ImportError:  # pragma: no cover
+    certifi = None
 
 
 API_BASE = "https://api.twitterapi.io"
@@ -82,6 +85,12 @@ def _build_url(path: str, query: dict[str, Any] | None = None) -> str:
     return f"{base}?{urllib.parse.urlencode(normalized_query)}"
 
 
+def _build_ssl_context() -> ssl.SSLContext:
+    if certifi is not None:
+        return ssl.create_default_context(cafile=certifi.where())
+    return ssl.create_default_context()
+
+
 def request_json(
     *,
     method: str,
@@ -95,7 +104,7 @@ def request_json(
     headers = {
         "X-API-Key": api_key,
         "Accept": "application/json",
-        "User-Agent": "factorix-twitterapi-x-reader/0.2",
+        "User-Agent": "tweet-api-skill/0.3",
     }
 
     if body is not None:
@@ -108,7 +117,7 @@ def request_json(
         method=method.upper(),
         headers=headers,
     )
-    ssl_context = ssl.create_default_context(cafile=certifi.where())
+    ssl_context = _build_ssl_context()
 
     try:
         with urllib.request.urlopen(req, timeout=30, context=ssl_context) as response:
