@@ -1,0 +1,21 @@
+#!/bin/zsh
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: xread <tweet-url-or-id> [--mode auto|article|tweet]" >&2
+  exit 1
+fi
+
+PERSONAL_FETCH="$HOME/.codex/skills/twitterapi_x_reader/scripts/twitterapi_fetch.py"
+
+if [[ -f "$PERSONAL_FETCH" ]]; then
+  TARGET="$PERSONAL_FETCH"
+else
+  echo "twitterapi_x_reader is not installed in ~/.codex/skills." >&2
+  exit 1
+fi
+
+INPUT="$1"
+shift
+
+exec python3 "$TARGET" --input "$INPUT" "$@"
