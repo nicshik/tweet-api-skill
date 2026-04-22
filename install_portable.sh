@@ -25,6 +25,8 @@ echo "Portable TwitterAPI X Reader updated."
 echo "Skill: $TARGET_SKILL_DIR"
 echo "Commands: $TARGET_BIN_DIR/xread, $TARGET_BIN_DIR/xapi"
 
+echo "If the commands are not found in a new terminal session, ensure ~/.local/bin is on PATH."
+
 if [[ -f "$TARGET_SKILL_DIR/.env.local" ]]; then
   echo "API key file preserved: $TARGET_SKILL_DIR/.env.local"
 else
