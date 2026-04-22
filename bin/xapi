@@ -1,0 +1,13 @@
+#!/bin/zsh
+set -euo pipefail
+
+PERSONAL_CALL="$HOME/.codex/skills/twitterapi_x_reader/scripts/twitterapi_call.py"
+
+if [[ -f "$PERSONAL_CALL" ]]; then
+  TARGET="$PERSONAL_CALL"
+else
+  echo "twitterapi_x_reader is not installed in ~/.codex/skills." >&2
+  exit 1
+fi
+
+exec python3 "$TARGET" "$@"
