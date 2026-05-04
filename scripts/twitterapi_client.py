@@ -20,7 +20,19 @@ except ImportError:  # pragma: no cover
 
 
 API_BASE = "https://api.twitterapi.io"
-TWEET_RE = re.compile(r"(?:x|twitter)\.com/[^/]+/status/(\d+)")
+API_HOST = urllib.parse.urlparse(API_BASE).netloc
+ALLOWED_METHODS = {"GET", "POST", "PATCH", "PUT", "DELETE"}
+PLACEHOLDER_API_KEYS = {
+    "your_key_here",
+    "<api-key>",
+    "<api_key>",
+    "replace_me",
+    "changeme",
+}
+TWEET_RE = re.compile(
+    r"(?:https?://)?(?:www\.)?(?:mobile\.)?(?:x|twitter)\.com/"
+    r"[^/?#]+/status(?:es)?/(\d+)"
+)
 ID_RE = re.compile(r"^\d+$")
 
 
@@ -39,10 +51,34 @@ def extract_tweet_id(value: str) -> str:
     )
 
 
+def _clean_api_key(raw_value: str | None, source: str) -> str | None:
+    if raw_value is None:
+        return None
+
+    value = raw_value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        value = value[1:-1].strip()
+
+    if not value:
+        return None
+
+    if value.lower() in PLACEHOLDER_API_KEYS:
+        raise RuntimeError(
+            f"{source} contains a placeholder API key. Set a real TWITTERAPI_IO_KEY."
+        )
+
+    return value
+
+
 def get_api_key(cli_key: str | None) -> str:
-    api_key = cli_key or os.getenv("TWITTERAPI_IO_KEY") or os.getenv("X_API_KEY")
-    if api_key:
-        return api_key
+    for source, raw_value in (
+        ("--api-key", cli_key),
+        ("TWITTERAPI_IO_KEY", os.getenv("TWITTERAPI_IO_KEY")),
+        ("X_API_KEY", os.getenv("X_API_KEY")),
+    ):
+        api_key = _clean_api_key(raw_value, source)
+        if api_key:
+            return api_key
 
     local_env = Path(__file__).resolve().parent.parent / ".env.local"
     if local_env.exists():
@@ -51,8 +87,10 @@ def get_api_key(cli_key: str | None) -> str:
             if not line or line.startswith("#") or "=" not in line:
                 continue
             key, value = line.split("=", 1)
-            if key.strip() == "TWITTERAPI_IO_KEY" and value.strip():
-                return value.strip()
+            if key.strip() == "TWITTERAPI_IO_KEY":
+                api_key = _clean_api_key(value, ".env.local")
+                if api_key:
+                    return api_key
 
     raise RuntimeError(
         "Missing API key. Set TWITTERAPI_IO_KEY in the environment, "
@@ -60,29 +98,49 @@ def get_api_key(cli_key: str | None) -> str:
     )
 
 
-def _build_url(path: str, query: dict[str, Any] | None = None) -> str:
+def _validated_base_url(path: str) -> str:
     if path.startswith("http://") or path.startswith("https://"):
-        base = path
-    else:
-        normalized_path = path if path.startswith("/") else f"/{path}"
-        base = f"{API_BASE}{normalized_path}"
+        parsed = urllib.parse.urlparse(path)
+        if parsed.scheme != "https" or parsed.netloc != API_HOST:
+            raise ValueError(
+                "Full URLs must use https://api.twitterapi.io. "
+                "Prefer passing an official path like /twitter/tweets."
+            )
+        if parsed.username or parsed.password:
+            raise ValueError("Full API URLs must not include credentials.")
+        return path
 
+    normalized_path = path if path.startswith("/") else f"/{path}"
+    return f"{API_BASE}{normalized_path}"
+
+
+def _query_items(query: dict[str, Any] | None) -> list[tuple[str, str | list[str]]]:
     if not query:
-        return base
+        return []
 
-    normalized_query: dict[str, str] = {}
+    items: list[tuple[str, str | list[str]]] = []
     for key, value in query.items():
         if value is None:
             continue
         if isinstance(value, bool):
-            normalized_query[key] = "true" if value else "false"
+            items.append((key, "true" if value else "false"))
+        elif isinstance(value, (list, tuple)):
+            items.append((key, [str(item) for item in value]))
         else:
-            normalized_query[key] = str(value)
+            items.append((key, str(value)))
+    return items
 
-    if not normalized_query:
+
+def _build_url(path: str, query: dict[str, Any] | None = None) -> str:
+    base = _validated_base_url(path)
+    items = _query_items(query)
+    if not items:
         return base
 
-    return f"{base}?{urllib.parse.urlencode(normalized_query)}"
+    parsed = urllib.parse.urlparse(base)
+    existing_items = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    query_string = urllib.parse.urlencode(existing_items + items, doseq=True)
+    return urllib.parse.urlunparse(parsed._replace(query=query_string))
 
 
 def _build_ssl_context() -> ssl.SSLContext:
@@ -99,12 +157,19 @@ def request_json(
     query: dict[str, Any] | None = None,
     body: dict[str, Any] | list[Any] | None = None,
 ) -> dict[str, Any]:
+    method = method.upper()
+    if method not in ALLOWED_METHODS:
+        raise ValueError(
+            f"Unsupported HTTP method: {method}. "
+            f"Allowed methods: {', '.join(sorted(ALLOWED_METHODS))}."
+        )
+
     url = _build_url(path, query)
     data = None
     headers = {
         "X-API-Key": api_key,
         "Accept": "application/json",
-        "User-Agent": "tweet-api-skill/0.3",
+        "User-Agent": "tweet-api-skill/0.4",
     }
 
     if body is not None:
@@ -114,7 +179,7 @@ def request_json(
     req = urllib.request.Request(
         url,
         data=data,
-        method=method.upper(),
+        method=method,
         headers=headers,
     )
     ssl_context = _build_ssl_context()

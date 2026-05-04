@@ -1,13 +1,7 @@
 ---
-name: twitterapi_x_reader
+name: twitterapi-x-reader
 description: Portable workflow for using twitterapi.io official endpoints for X or Twitter reads, articles, search, user data, communities, lists, spaces, trends, streams, webhook rules, and explicitly requested write actions.
 license: MIT
-compatibility:
-  runtimes:
-    - codex
-    - claude_code
-    - cursor
-    - windsurf
 metadata:
   category: research
   capability_taxonomy_ids:
@@ -15,7 +9,7 @@ metadata:
     - cap.research.twitter_article_parse
   distribution_scope: public
   invocation_strategy: explicit
-  version: v0.3
+  version: v0.4
   source_of_truth: github:nicshik/tweet-api-skill
 ---
 
@@ -78,6 +72,7 @@ At minimum, the workflow must remain ready for these method groups:
 - Also allowed: raw tweet id.
 - Do not treat `x.com/i/article/<id>` as sufficient input by itself; the API article endpoint expects the parent tweet id.
 - For generic endpoint usage, prefer exact official paths from the docs.
+- If a full URL is used instead of a path, it must stay under `https://api.twitterapi.io`; do not send the API key to arbitrary hosts.
 
 ## Command Patterns
 

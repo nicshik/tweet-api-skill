@@ -84,7 +84,7 @@ def main() -> int:
         sys.stdout.write("\n")
         return 0
     except Exception as exc:  # noqa: BLE001
-        sys.stderr.write(f"twitterapi_x_reader error: {exc}\n")
+        sys.stderr.write(f"twitterapi-x-reader error: {exc}\n")
         return 1
 
 
