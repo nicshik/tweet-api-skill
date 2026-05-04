@@ -1,5 +1,8 @@
 # TwitterAPI X Reader
 
+[![CI](https://github.com/nicshik/tweet-api-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/nicshik/tweet-api-skill/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Portable skill and helper scripts for working with X (Twitter) through `twitterapi.io`.
 
 ## Overview
@@ -13,6 +16,8 @@ It is designed for people who want:
 - a stable path for research, summarization, and structured extraction from X.
 
 This project is not affiliated with X Corp., Twitter, or `twitterapi.io`.
+
+Maintainer: [`nicshik`](https://github.com/nicshik).
 
 ## What Is Included
 
@@ -151,6 +156,12 @@ Validate the skill metadata with the Skill Creator validator when available:
 ```bash
 python /path/to/skill-creator/scripts/quick_validate.py .
 ```
+
+## Support / Security
+
+Use GitHub Issues for questions, bugs, and feature requests.
+
+Report security vulnerabilities privately through `SECURITY.md`. Do not open public issues with API keys, `.env.local`, private account data, or exploit details.
 
 ## Update Flow
 
