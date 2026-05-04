@@ -8,9 +8,11 @@ This repository packages a reusable skill plus terminal helpers for reading twee
 
 It is designed for people who want:
 
-- a portable skill install in `~/.codex/skills/twitterapi_x_reader`;
+- a portable skill install in `~/.codex/skills/twitterapi-x-reader`;
 - simple terminal commands like `xread` and `xapi`;
 - a stable path for research, summarization, and structured extraction from X.
+
+This project is not affiliated with X Corp., Twitter, or `twitterapi.io`.
 
 ## What Is Included
 
@@ -20,6 +22,12 @@ It is designed for people who want:
 - `scripts/` with Python helpers
 - `bin/xread` and `bin/xapi` terminal wrappers
 - `install_portable.sh` for install and update
+
+## Requirements
+
+- Python 3.10 or newer
+- `zsh`, `rsync`, and `install` for `install_portable.sh`
+- a `twitterapi.io` API key
 
 ## Installation
 
@@ -33,8 +41,8 @@ chmod +x ./install_portable.sh
 Then create your local key file if it does not already exist:
 
 ```bash
-mkdir -p ~/.codex/skills/twitterapi_x_reader
-printf '%s\n' 'TWITTERAPI_IO_KEY=your_key_here' > ~/.codex/skills/twitterapi_x_reader/.env.local
+mkdir -p ~/.codex/skills/twitterapi-x-reader
+printf '%s\n' 'TWITTERAPI_IO_KEY=your_key_here' > ~/.codex/skills/twitterapi-x-reader/.env.local
 ```
 
 If your shell does not already include `~/.local/bin` in `PATH`, add it.
@@ -58,6 +66,8 @@ Call any documented endpoint:
 ```bash
 xapi --method GET --path /oapi/my/info --query-json '{}'
 ```
+
+`xapi` accepts official API paths by default. Full URLs are only accepted for `https://api.twitterapi.io` so the API key is not sent to arbitrary hosts.
 
 ## Practical Workflows
 
@@ -117,13 +127,29 @@ This repository does not store API keys.
 The expected local key file is:
 
 ```text
-~/.codex/skills/twitterapi_x_reader/.env.local
+~/.codex/skills/twitterapi-x-reader/.env.local
 ```
 
 Example:
 
 ```text
 TWITTERAPI_IO_KEY=your_key_here
+```
+
+The scripts also accept `--api-key`, but environment variables or `.env.local` are preferred because command-line arguments can be recorded in shell history.
+
+## Development
+
+Run the no-network tests:
+
+```bash
+python -m unittest discover -s tests
+```
+
+Validate the skill metadata with the Skill Creator validator when available:
+
+```bash
+python /path/to/skill-creator/scripts/quick_validate.py .
 ```
 
 ## Update Flow
@@ -136,11 +162,14 @@ After pulling new changes from this repository, refresh the portable install wit
 
 This updates the installed skill and global wrappers while preserving the local `.env.local` file.
 
+Older local installs under `~/.codex/skills/twitterapi_x_reader` are detected during installation. The installer copies the legacy `.env.local` into the new hyphen-case skill directory when needed, and the `xread`/`xapi` wrappers still check the legacy path for compatibility.
+
 ## Notes
 
 - The default posture is read-only.
 - Mutating API endpoints should only be used intentionally.
 - `certifi` is supported when available, but the scripts can also fall back to the system certificate store.
+- See `SECURITY.md` before publishing logs, examples, or bug reports.
 
 ## License
 

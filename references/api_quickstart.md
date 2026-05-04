@@ -25,7 +25,7 @@ TWITTERAPI_IO_KEY
 Fallback for a personal local install:
 
 ```text
-~/.codex/skills/twitterapi_x_reader/.env.local
+~/.codex/skills/twitterapi-x-reader/.env.local
 ```
 
 ## Operational Model

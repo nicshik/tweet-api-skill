@@ -19,7 +19,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--path",
         required=True,
-        help="Official API path like /twitter/tweets or full https:// URL.",
+        help=(
+            "Official API path like /twitter/tweets, or a full "
+            "https://api.twitterapi.io URL."
+        ),
     )
     parser.add_argument(
         "--query-json",
@@ -68,7 +71,7 @@ def main() -> int:
         sys.stdout.write("\n")
         return 0
     except Exception as exc:  # noqa: BLE001
-        sys.stderr.write(f"twitterapi_x_reader error: {exc}\n")
+        sys.stderr.write(f"twitterapi-x-reader error: {exc}\n")
         return 1
 
 

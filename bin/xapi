@@ -1,12 +1,15 @@
 #!/bin/zsh
 set -euo pipefail
 
-PERSONAL_CALL="$HOME/.codex/skills/twitterapi_x_reader/scripts/twitterapi_call.py"
+PRIMARY_CALL="$HOME/.codex/skills/twitterapi-x-reader/scripts/twitterapi_call.py"
+LEGACY_CALL="$HOME/.codex/skills/twitterapi_x_reader/scripts/twitterapi_call.py"
 
-if [[ -f "$PERSONAL_CALL" ]]; then
-  TARGET="$PERSONAL_CALL"
+if [[ -f "$PRIMARY_CALL" ]]; then
+  TARGET="$PRIMARY_CALL"
+elif [[ -f "$LEGACY_CALL" ]]; then
+  TARGET="$LEGACY_CALL"
 else
-  echo "twitterapi_x_reader is not installed in ~/.codex/skills." >&2
+  echo "twitterapi-x-reader is not installed in ~/.codex/skills." >&2
   exit 1
 fi
 

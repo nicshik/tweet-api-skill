@@ -6,12 +6,15 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi
 
-PERSONAL_FETCH="$HOME/.codex/skills/twitterapi_x_reader/scripts/twitterapi_fetch.py"
+PRIMARY_FETCH="$HOME/.codex/skills/twitterapi-x-reader/scripts/twitterapi_fetch.py"
+LEGACY_FETCH="$HOME/.codex/skills/twitterapi_x_reader/scripts/twitterapi_fetch.py"
 
-if [[ -f "$PERSONAL_FETCH" ]]; then
-  TARGET="$PERSONAL_FETCH"
+if [[ -f "$PRIMARY_FETCH" ]]; then
+  TARGET="$PRIMARY_FETCH"
+elif [[ -f "$LEGACY_FETCH" ]]; then
+  TARGET="$LEGACY_FETCH"
 else
-  echo "twitterapi_x_reader is not installed in ~/.codex/skills." >&2
+  echo "twitterapi-x-reader is not installed in ~/.codex/skills." >&2
   exit 1
 fi
 
