@@ -121,7 +121,7 @@ xapi --method GET --path /twitter/tweet/advanced_search --query-json '{"query":"
 For more detailed examples, see:
 
 - `references/research_examples.md`
-- `references/что_умеет_инструмент.md`
+- `references/capabilities.md`
 - `references/api_quickstart.md`
 - `references/endpoint_catalog.md`
 
