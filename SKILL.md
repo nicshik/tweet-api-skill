@@ -109,6 +109,6 @@ At minimum, the workflow must remain ready for these method groups:
 
 ## References
 
-- `references/что_умеет_инструмент.md`
+- `references/capabilities.md`
 - `references/api_quickstart.md`
 - `references/endpoint_catalog.md`
