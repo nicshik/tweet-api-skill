@@ -28,3 +28,6 @@ jobs:
 
       - name: Run unit tests and metadata checks
         run: python -m unittest discover -s tests
+
+      - name: Check local documentation links
+        run: python scripts/check_links.py

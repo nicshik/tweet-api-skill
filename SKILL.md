@@ -9,7 +9,7 @@ metadata:
     - cap.research.twitter_article_parse
   distribution_scope: public
   invocation_strategy: explicit
-  version: v0.4
+  version: v0.4.1
   source_of_truth: github:nicshik/tweet-api-skill
 ---
 
@@ -85,10 +85,10 @@ At minimum, the workflow must remain ready for these method groups:
 - Generic documented GET endpoint:
   - `python3 scripts/twitterapi_call.py --method GET --path "<official-path>" --query-json '{"key":"value"}'`
 - Generic documented POST endpoint:
-  - `python3 scripts/twitterapi_call.py --method POST --path "<official-path>" --body-json '{"key":"value"}'`
+  - `python3 scripts/twitterapi_call.py --method POST --path "<official-path>" --body-json '{"key":"value"}' --allow-mutation`
 - Generic documented PATCH or DELETE endpoint:
-  - `python3 scripts/twitterapi_call.py --method PATCH --path "<official-path>" --body-json '{...}'`
-  - `python3 scripts/twitterapi_call.py --method DELETE --path "<official-path>" --query-json '{...}'`
+  - `python3 scripts/twitterapi_call.py --method PATCH --path "<official-path>" --body-json '{...}' --allow-mutation`
+  - `python3 scripts/twitterapi_call.py --method DELETE --path "<official-path>" --query-json '{...}' --allow-mutation`
 
 ## Endpoint Selection Rules
 
@@ -100,7 +100,7 @@ At minimum, the workflow must remain ready for these method groups:
 ## Safety And Cost Rules
 
 - Default to read-only methods unless the user explicitly asks for an action.
-- For `POST`, `PATCH`, or `DELETE` endpoints that mutate account or community state, confirm the exact intended action in your own reasoning before running the request.
+- `POST`, `PATCH`, `PUT`, and `DELETE` require `--allow-mutation`; use it only after confirming the exact intended account or community action.
 - Prefer `--mode auto` only when article presence is plausible and useful.
 - Remember that article fetches and search endpoints may cost more than simple reads.
 - Never print the API key.
