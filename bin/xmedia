@@ -1,0 +1,16 @@
+#!/bin/zsh
+set -euo pipefail
+
+PRIMARY_MEDIA="$HOME/.codex/skills/twitterapi-x-reader/scripts/twitterapi_media.py"
+LEGACY_MEDIA="$HOME/.codex/skills/twitterapi_x_reader/scripts/twitterapi_media.py"
+
+if [[ -f "$PRIMARY_MEDIA" ]]; then
+  TARGET="$PRIMARY_MEDIA"
+elif [[ -f "$LEGACY_MEDIA" ]]; then
+  TARGET="$LEGACY_MEDIA"
+else
+  echo "twitterapi-x-reader is not installed in ~/.codex/skills." >&2
+  exit 1
+fi
+
+exec python3 "$TARGET" "$@"

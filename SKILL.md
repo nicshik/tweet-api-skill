@@ -1,6 +1,6 @@
 ---
 name: twitterapi-x-reader
-description: Portable workflow for using twitterapi.io official endpoints for X or Twitter reads, articles, search, user data, communities, lists, spaces, trends, streams, webhook rules, and explicitly requested write actions.
+description: Portable workflow for using twitterapi.io official endpoints for X or Twitter reads, articles, video downloads, search, user data, communities, lists, spaces, trends, streams, webhook rules, and explicitly requested write actions.
 license: MIT
 metadata:
   category: research
@@ -9,7 +9,7 @@ metadata:
     - cap.research.twitter_article_parse
   distribution_scope: public
   invocation_strategy: explicit
-  version: v0.4.1
+  version: v0.4.2
   source_of_truth: github:nicshik/tweet-api-skill
 ---
 
@@ -19,6 +19,7 @@ Use this skill when you need reliable access to X or Twitter data through `twitt
 
 - tweet details by URL or id;
 - long-form X Articles linked from a tweet;
+- downloadable MP4 video media attached to a tweet;
 - user lookup and user search;
 - followers, following, replies, retweets, quotes, likers, and bookmarks;
 - communities, lists, spaces, and trends;
@@ -39,12 +40,14 @@ This skill is intentionally explicit-only because `twitterapi.io` consumes paid 
 
 1. Decide whether the task is:
    - a common content read (`tweet` or `article`);
+   - a video media download;
    - another documented read endpoint;
    - a mutating account action.
 2. For tweets and articles, run `scripts/twitterapi_fetch.py`.
-3. For any other documented endpoint, run `scripts/twitterapi_call.py` with the official method, path, and query/body payload.
-4. Inspect the JSON and summarize or transform it for the user.
-5. Mention when the result came from `twitterapi.io` rather than direct X rendering.
+3. For downloading tweet video files, run `scripts/twitterapi_media.py`.
+4. For any other documented endpoint, run `scripts/twitterapi_call.py` with the official method, path, and query/body payload.
+5. Inspect the JSON and summarize or transform it for the user.
+6. Mention when the result came from `twitterapi.io` rather than direct X rendering.
 
 ## Coverage
 
@@ -57,6 +60,7 @@ This skill should be treated as covering the official `twitterapi.io` surface do
 At minimum, the workflow must remain ready for these method groups:
 
 - tweet reads and search;
+- tweet video media downloads;
 - article fetches;
 - user reads and graph reads;
 - list, community, space, and trend reads;
@@ -82,6 +86,8 @@ At minimum, the workflow must remain ready for these method groups:
   - `python3 scripts/twitterapi_fetch.py --input "<url-or-id>" --mode article`
 - Force tweet lookup:
   - `python3 scripts/twitterapi_fetch.py --input "<url-or-id>" --mode tweet`
+- Download the best MP4 video from a tweet:
+  - `python3 scripts/twitterapi_media.py "<url-or-id>" --output-dir ./downloads`
 - Generic documented GET endpoint:
   - `python3 scripts/twitterapi_call.py --method GET --path "<official-path>" --query-json '{"key":"value"}'`
 - Generic documented POST endpoint:
@@ -93,6 +99,7 @@ At minimum, the workflow must remain ready for these method groups:
 ## Endpoint Selection Rules
 
 - Prefer `twitterapi_fetch.py` for article-or-tweet workflows because it normalizes the result.
+- Prefer `twitterapi_media.py` when the user asks for an actual video file from a tweet; it selects the best `video/mp4` variant and writes the file locally.
 - Prefer `twitterapi_call.py` for every other official endpoint.
 - Use raw official paths from the docs if no local shorthand exists.
 - Keep the skill aligned with the docs instead of inventing unofficial endpoint names.
@@ -101,6 +108,7 @@ At minimum, the workflow must remain ready for these method groups:
 
 - Default to read-only methods unless the user explicitly asks for an action.
 - `POST`, `PATCH`, `PUT`, and `DELETE` require `--allow-mutation`; use it only after confirming the exact intended account or community action.
+- Media downloads write files locally and are limited to HTTPS URLs under `video.twimg.com`.
 - Prefer `--mode auto` only when article presence is plausible and useful.
 - Remember that article fetches and search endpoints may cost more than simple reads.
 - Never print the API key.

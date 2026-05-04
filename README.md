@@ -9,12 +9,12 @@ Portable skill and helper scripts for working with X (Twitter) through `twittera
 
 ## Overview
 
-This repository packages a reusable skill plus terminal helpers for reading tweets, X Articles, and other documented `twitterapi.io` endpoints without relying on direct `x.com` rendering.
+This repository packages a reusable skill plus terminal helpers for reading tweets, X Articles, downloading tweet videos, and calling other documented `twitterapi.io` endpoints without relying on direct `x.com` rendering.
 
 It is designed for people who want:
 
 - a portable skill install in `~/.codex/skills/twitterapi-x-reader`;
-- simple terminal commands like `xread` and `xapi`;
+- simple terminal commands like `xread`, `xapi`, and `xmedia`;
 - a stable path for research, summarization, and structured extraction from X.
 
 This project is not affiliated with X Corp., Twitter, or `twitterapi.io`.
@@ -27,7 +27,7 @@ Maintainer: [`nicshik`](https://github.com/nicshik).
 - `agents/openai.yaml` for UI metadata
 - `references/` with quickstart, human-readable notes, and research examples
 - `scripts/` with Python helpers
-- `bin/xread` and `bin/xapi` terminal wrappers
+- `bin/xread`, `bin/xapi`, and `bin/xmedia` terminal wrappers
 - `install_portable.sh` for install and update
 
 ## Requirements
@@ -58,7 +58,7 @@ If your shell does not already include `~/.local/bin` in `PATH`, add it.
 
 ### CLI Package Install
 
-If you only need the `xread` and `xapi` console scripts, install the package directly:
+If you only need the `xread`, `xapi`, and `xmedia` console scripts, install the package directly:
 
 ```bash
 python -m pip install "git+https://github.com/nicshik/tweet-api-skill.git"
@@ -79,6 +79,14 @@ Force article mode:
 ```bash
 xread "2046570503801119055" --mode article
 ```
+
+Download the best MP4 video from a tweet:
+
+```bash
+xmedia "https://x.com/Yoda4ever/status/2049680135658336270?s=20" --output-dir ./downloads
+```
+
+`xmedia` prints JSON with the saved file path, byte count, source media URL, bitrate, and media key. Downloads are limited to HTTPS URLs under `video.twimg.com`.
 
 Call any documented endpoint:
 
@@ -138,6 +146,14 @@ Search tweets by topic:
 xapi --method GET --path /twitter/tweet/advanced_search --query-json '{"query":"\"AI agents\" Telegram TON","queryType":"Top"}'
 ```
 
+Download tweet video media for later processing:
+
+```bash
+xmedia "https://x.com/Yoda4ever/status/2049680135658336270?s=20" --output-dir ./downloads --overwrite
+```
+
+If a tweet has several video media items, `xmedia` downloads all of them by default. Use `--first` to download only the first item, or `--filename custom-name.mp4` when exactly one item is selected.
+
 For more detailed examples, see:
 
 - `references/research_examples.md`
@@ -183,6 +199,7 @@ Verify the package entry points locally:
 python -m pip install .
 xapi --help
 xread --help
+xmedia --help
 ```
 
 Validate the skill metadata with the Skill Creator validator when available:
@@ -207,12 +224,13 @@ After pulling new changes from this repository, refresh the portable install wit
 
 This updates the installed skill and global wrappers while preserving the local `.env.local` file.
 
-Older local installs under `~/.codex/skills/twitterapi_x_reader` are detected during installation. The installer copies the legacy `.env.local` into the new hyphen-case skill directory when needed, and the `xread`/`xapi` wrappers still check the legacy path for compatibility.
+Older local installs under `~/.codex/skills/twitterapi_x_reader` are detected during installation. The installer copies the legacy `.env.local` into the new hyphen-case skill directory when needed, and the `xread`/`xapi`/`xmedia` wrappers still check the legacy path for compatibility.
 
 ## Notes
 
 - The default posture is read-only.
 - Mutating API endpoints should only be used intentionally.
+- Media downloads write local files and are limited to `video.twimg.com`.
 - `certifi` is supported when available, but the scripts can also fall back to the system certificate store.
 - See `SECURITY.md` before publishing logs, examples, or bug reports.
 
