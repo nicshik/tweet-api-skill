@@ -102,6 +102,46 @@ Mutating HTTP methods are blocked unless you pass `--allow-mutation`:
 xapi --method POST --path /twitter/post/create --body-json '{"text":"draft"}' --allow-mutation
 ```
 
+## Video Downloads
+
+For an installed skill, video export is initiated with the global wrapper:
+
+```bash
+xmedia "<tweet-url-or-id>" --output-dir ./downloads
+```
+
+The direct skill-script equivalent is:
+
+```bash
+python3 ~/.codex/skills/twitterapi-x-reader/scripts/twitterapi_media.py "<tweet-url-or-id>" --output-dir ./downloads
+```
+
+The command writes one or more `.mp4` files and prints JSON like:
+
+```json
+{
+  "kind": "media_download",
+  "tweet_id": "2049680135658336270",
+  "files": [
+    {
+      "path": "/absolute/path/to/2049680135658336270-media-1-2176000.mp4",
+      "bytes": 5744965,
+      "bitrate": 2176000,
+      "media_key": "13_2049617901142118400",
+      "url": "https://video.twimg.com/..."
+    }
+  ],
+  "source": "twitterapi.io"
+}
+```
+
+Useful flags:
+
+- `--output-dir ./downloads` sets the destination directory.
+- `--first` downloads only the first video media item.
+- `--filename name.mp4` sets the output name when exactly one file is selected.
+- `--overwrite` replaces an existing file.
+
 ## Practical Workflows
 
 Read a tweet or X Article and then analyze it:

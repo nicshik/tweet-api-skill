@@ -102,6 +102,46 @@ xapi --method GET --path /oapi/my/info --query-json '{}'
 xapi --method POST --path /twitter/post/create --body-json '{"text":"draft"}' --allow-mutation
 ```
 
+## Выгрузка видео
+
+Если навык установлен, выгрузка видео запускается глобальной командой:
+
+```bash
+xmedia "<tweet-url-or-id>" --output-dir ./downloads
+```
+
+Прямой вызов скрипта внутри установленного навыка:
+
+```bash
+python3 ~/.codex/skills/twitterapi-x-reader/scripts/twitterapi_media.py "<tweet-url-or-id>" --output-dir ./downloads
+```
+
+Команда записывает один или несколько `.mp4` файлов и печатает JSON такого вида:
+
+```json
+{
+  "kind": "media_download",
+  "tweet_id": "2049680135658336270",
+  "files": [
+    {
+      "path": "/absolute/path/to/2049680135658336270-media-1-2176000.mp4",
+      "bytes": 5744965,
+      "bitrate": 2176000,
+      "media_key": "13_2049617901142118400",
+      "url": "https://video.twimg.com/..."
+    }
+  ],
+  "source": "twitterapi.io"
+}
+```
+
+Полезные флаги:
+
+- `--output-dir ./downloads` задаёт директорию для сохранения.
+- `--first` скачивает только первое видео из твита.
+- `--filename name.mp4` задаёт имя файла, если выбран ровно один файл.
+- `--overwrite` заменяет существующий файл.
+
 ## Практические сценарии
 
 Прочитать твит или X Article и затем разобрать содержимое:
