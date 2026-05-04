@@ -96,6 +96,22 @@ At minimum, the workflow must remain ready for these method groups:
   - `python3 scripts/twitterapi_call.py --method PATCH --path "<official-path>" --body-json '{...}' --allow-mutation`
   - `python3 scripts/twitterapi_call.py --method DELETE --path "<official-path>" --query-json '{...}' --allow-mutation`
 
+## Video Download Flow
+
+When the user asks for a video file from a tweet, initiate the download with:
+
+```bash
+xmedia "<tweet-url-or-id>" --output-dir ./downloads
+```
+
+Inside the installed skill, the equivalent direct script command is:
+
+```bash
+python3 ~/.codex/skills/twitterapi-x-reader/scripts/twitterapi_media.py "<tweet-url-or-id>" --output-dir ./downloads
+```
+
+Use `--first` to download only the first video media item, `--filename name.mp4` when exactly one file is selected, and `--overwrite` to replace an existing file. The command prints JSON with `files[].path`, byte size, selected bitrate, media key, and source media URL.
+
 ## Endpoint Selection Rules
 
 - Prefer `twitterapi_fetch.py` for article-or-tweet workflows because it normalizes the result.
