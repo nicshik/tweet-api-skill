@@ -38,6 +38,8 @@
 
 ## Установка
 
+### Установка портативного навыка
+
 Из корня репозитория:
 
 ```bash
@@ -53,6 +55,16 @@ printf '%s\n' 'TWITTERAPI_IO_KEY=your_key_here' > ~/.codex/skills/twitterapi-x-r
 ```
 
 Если в вашем shell путь `~/.local/bin` ещё не добавлен в `PATH`, добавьте его.
+
+### Пакетная установка командной строки
+
+Если нужны только команды `xread` и `xapi`, установите пакет напрямую:
+
+```bash
+python -m pip install "git+https://github.com/nicshik/tweet-api-skill.git"
+```
+
+Пакетная установка не устанавливает файлы навыка Codex. Для авторизации используйте `TWITTERAPI_IO_KEY` или `--api-key`.
 
 ## Быстрый старт
 
@@ -75,6 +87,12 @@ xapi --method GET --path /oapi/my/info --query-json '{}'
 ```
 
 По умолчанию `xapi` принимает официальные пути API. Полные URL разрешены только для `https://api.twitterapi.io`, чтобы API-ключ не отправлялся на произвольные хосты.
+
+Изменяющие HTTP-методы заблокированы без флага `--allow-mutation`:
+
+```bash
+xapi --method POST --path /twitter/post/create --body-json '{"text":"draft"}' --allow-mutation
+```
 
 ## Практические сценарии
 
@@ -151,6 +169,20 @@ TWITTERAPI_IO_KEY=your_key_here
 
 ```bash
 python -m unittest discover -s tests
+```
+
+Проверить локальные ссылки в документации:
+
+```bash
+python scripts/check_links.py
+```
+
+Проверить точки входа пакета локально:
+
+```bash
+python -m pip install .
+xapi --help
+xread --help
 ```
 
 Проверить метаданные навыка валидатором Skill Creator, если он доступен:

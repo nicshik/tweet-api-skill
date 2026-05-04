@@ -38,6 +38,8 @@ Maintainer: [`nicshik`](https://github.com/nicshik).
 
 ## Installation
 
+### Portable Skill Install
+
 From the repository root:
 
 ```bash
@@ -53,6 +55,16 @@ printf '%s\n' 'TWITTERAPI_IO_KEY=your_key_here' > ~/.codex/skills/twitterapi-x-r
 ```
 
 If your shell does not already include `~/.local/bin` in `PATH`, add it.
+
+### CLI Package Install
+
+If you only need the `xread` and `xapi` console scripts, install the package directly:
+
+```bash
+python -m pip install "git+https://github.com/nicshik/tweet-api-skill.git"
+```
+
+The package install does not install the Codex skill files. Use `TWITTERAPI_IO_KEY` or `--api-key` for authentication.
 
 ## Quick Start
 
@@ -75,6 +87,12 @@ xapi --method GET --path /oapi/my/info --query-json '{}'
 ```
 
 `xapi` accepts official API paths by default. Full URLs are only accepted for `https://api.twitterapi.io` so the API key is not sent to arbitrary hosts.
+
+Mutating HTTP methods are blocked unless you pass `--allow-mutation`:
+
+```bash
+xapi --method POST --path /twitter/post/create --body-json '{"text":"draft"}' --allow-mutation
+```
 
 ## Practical Workflows
 
@@ -151,6 +169,20 @@ Run the no-network tests:
 
 ```bash
 python -m unittest discover -s tests
+```
+
+Check local documentation links:
+
+```bash
+python scripts/check_links.py
+```
+
+Verify the package entry points locally:
+
+```bash
+python -m pip install .
+xapi --help
+xread --help
 ```
 
 Validate the skill metadata with the Skill Creator validator when available:

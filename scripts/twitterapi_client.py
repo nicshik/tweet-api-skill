@@ -169,7 +169,7 @@ def request_json(
     headers = {
         "X-API-Key": api_key,
         "Accept": "application/json",
-        "User-Agent": "tweet-api-skill/0.4",
+        "User-Agent": "tweet-api-skill/0.4.1",
     }
 
     if body is not None:

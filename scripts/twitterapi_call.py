@@ -11,6 +11,9 @@ from typing import Any
 from twitterapi_client import get_api_key, request_json
 
 
+MUTATING_METHODS = {"POST", "PATCH", "PUT", "DELETE"}
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Call any documented twitterapi.io endpoint."
@@ -33,6 +36,14 @@ def parse_args() -> argparse.Namespace:
         "--body-json",
         default="null",
         help="JSON object or array for request body.",
+    )
+    parser.add_argument(
+        "--allow-mutation",
+        action="store_true",
+        help=(
+            "Required for POST, PATCH, PUT, and DELETE endpoints. "
+            "Use only after confirming the endpoint can mutate account state."
+        ),
     )
     parser.add_argument(
         "--api-key",
@@ -59,9 +70,16 @@ def main() -> int:
         if body is not None and not isinstance(body, (dict, list)):
             raise ValueError("--body-json must decode to null, object, or array")
 
+        method = args.method.upper()
+        if method in MUTATING_METHODS and not args.allow_mutation:
+            raise ValueError(
+                "POST, PATCH, PUT, and DELETE requests require --allow-mutation. "
+                "Confirm the endpoint is intended to mutate account state before retrying."
+            )
+
         api_key = get_api_key(args.api_key)
         result = request_json(
-            method=args.method,
+            method=method,
             path=args.path,
             api_key=api_key,
             query=query,
