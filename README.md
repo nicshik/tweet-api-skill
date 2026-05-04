@@ -5,6 +5,8 @@
 
 Portable skill and helper scripts for working with X (Twitter) through `twitterapi.io`.
 
+[🇷🇺 Читать на русском](README.ru.md)
+
 ## Overview
 
 This repository packages a reusable skill plus terminal helpers for reading tweets, X Articles, and other documented `twitterapi.io` endpoints without relying on direct `x.com` rendering.
