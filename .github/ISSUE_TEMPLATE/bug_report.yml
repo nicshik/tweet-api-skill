@@ -1,0 +1,62 @@
+name: Bug report
+description: Report a reproducible problem with the skill or CLI helpers.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Do not include API keys, `.env.local`, private account data, or raw responses that contain sensitive data.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Use a release tag, commit SHA, or `main`.
+      placeholder: v0.4.0
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - xread
+        - xapi
+        - install_portable.sh
+        - SKILL.md / agent usage
+        - documentation
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the smallest command or workflow that reproduces the issue.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Redact API keys and sensitive data before pasting output.
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: Python 3.12.2
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 15, Ubuntu 24.04, etc.
