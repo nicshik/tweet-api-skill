@@ -25,16 +25,20 @@ rsync -a --delete \
   --exclude 'install_portable.sh' \
   --exclude 'bin' \
   --exclude 'tests' \
+  --exclude '*.egg-info' \
+  --exclude 'build' \
+  --exclude 'dist' \
   --exclude '__pycache__' \
   --exclude '.env.local' \
   "$REPO_ROOT/" "$TARGET_SKILL_DIR/"
 
 install -m 755 "$REPO_ROOT/bin/xread" "$TARGET_BIN_DIR/xread"
 install -m 755 "$REPO_ROOT/bin/xapi" "$TARGET_BIN_DIR/xapi"
+install -m 755 "$REPO_ROOT/bin/xmedia" "$TARGET_BIN_DIR/xmedia"
 
 echo "Portable TwitterAPI X Reader updated."
 echo "Skill: $TARGET_SKILL_DIR"
-echo "Commands: $TARGET_BIN_DIR/xread, $TARGET_BIN_DIR/xapi"
+echo "Commands: $TARGET_BIN_DIR/xread, $TARGET_BIN_DIR/xapi, $TARGET_BIN_DIR/xmedia"
 
 echo "If the commands are not found in a new terminal session, ensure ~/.local/bin is on PATH."
 
@@ -47,5 +51,5 @@ fi
 
 if [[ -d "$LEGACY_SKILL_DIR" ]]; then
   echo "Legacy install detected: $LEGACY_SKILL_DIR"
-  echo "The new skill name is twitterapi-x-reader; legacy xread/xapi lookup remains supported."
+  echo "The new skill name is twitterapi-x-reader; legacy xread/xapi/xmedia lookup remains supported."
 fi

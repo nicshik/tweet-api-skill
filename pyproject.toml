@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "twitterapi-x-reader"
-version = "0.4.1"
-description = "Portable skill and CLI helpers for reading X/Twitter data through twitterapi.io."
+version = "0.4.2"
+description = "Portable skill and CLI helpers for reading X/Twitter data and videos through twitterapi.io."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -33,12 +33,14 @@ Issues = "https://github.com/nicshik/tweet-api-skill/issues"
 
 [project.scripts]
 xapi = "twitterapi_call:main"
+xmedia = "twitterapi_media:main"
 xread = "twitterapi_fetch:main"
 
 [tool.setuptools]
 py-modules = [
   "twitterapi_call",
   "twitterapi_fetch",
+  "twitterapi_media",
   "twitterapi_client",
 ]
 

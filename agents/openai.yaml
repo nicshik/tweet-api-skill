@@ -1,8 +1,8 @@
 interface:
   display_name: "TwitterAPI X Reader"
-  short_description: "Fetch X tweets and X Articles via API"
+  short_description: "Fetch X tweets, X Articles, and videos via API"
   brand_color: "#111827"
-  default_prompt: "Use $twitterapi-x-reader to fetch a tweet or X Article from twitterapi.io and summarize the result."
+  default_prompt: "Use $twitterapi-x-reader to fetch a tweet, X Article, or tweet video from twitterapi.io and return the result."
 
 policy:
   allow_implicit_invocation: false
