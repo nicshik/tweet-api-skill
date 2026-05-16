@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download tweet video media from twitterapi.io tweet data."""
+"""Download tweet video media from supported X/Twitter API provider data."""
 
 from __future__ import annotations
 
@@ -14,9 +14,13 @@ from pathlib import Path
 from typing import Any
 
 from twitterapi_client import (
+    TWITTERAPI_IO_PROVIDER,
+    XQUIK_PROVIDER,
     build_ssl_context,
     extract_tweet_id,
     get_api_key,
+    normalize_api_provider,
+    provider_source_name,
     request_json,
 )
 
@@ -24,12 +28,12 @@ from twitterapi_client import (
 ALLOWED_MEDIA_HOSTS = {"video.twimg.com"}
 BUFFER_SIZE = 1024 * 1024
 RESOLUTION_RE = re.compile(r"/(\d+)x(\d+)/")
-USER_AGENT = "tweet-api-skill/0.4.2"
+USER_AGENT = "tweet-api-skill/0.4.3"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Download the best MP4 video media from a tweet via twitterapi.io."
+        description="Download the best MP4 video media from a tweet via a provider."
     )
     parser.add_argument("tweet", nargs="?", help="Tweet URL or raw tweet id.")
     parser.add_argument(
@@ -58,7 +62,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--api-key",
-        help="Optional override. Prefer TWITTERAPI_IO_KEY env var.",
+        help="Optional override. Prefer TWITTERAPI_IO_KEY or XQUIK_API_KEY env var.",
+    )
+    parser.add_argument(
+        "--api-provider",
+        choices=(TWITTERAPI_IO_PROVIDER, XQUIK_PROVIDER),
+        help="API provider. Defaults to X_API_PROVIDER, API_PROVIDER, or twitterapi_io.",
     )
     return parser.parse_args()
 
@@ -72,12 +81,31 @@ def requested_input(args: argparse.Namespace) -> str:
     return values[0]
 
 
-def fetch_tweet(tweet_id: str, api_key: str) -> dict[str, Any]:
+def fetch_tweet(
+    tweet_id: str,
+    api_key: str,
+    api_provider: str = TWITTERAPI_IO_PROVIDER,
+) -> dict[str, Any]:
+    api_provider = normalize_api_provider(api_provider)
+    if api_provider == XQUIK_PROVIDER:
+        payload = request_json(
+            method="GET",
+            path="/x/tweets",
+            query={"ids": tweet_id},
+            api_key=api_key,
+            api_provider=api_provider,
+        )
+        tweets = payload.get("tweets") or []
+        if tweets and isinstance(tweets[0], dict):
+            return tweets[0]
+        raise RuntimeError(payload.get("message") or "Tweet not found")
+
     payload = request_json(
         method="GET",
         path="/twitter/tweets",
         query={"tweet_ids": tweet_id},
         api_key=api_key,
+        api_provider=api_provider,
     )
     tweets = payload.get("tweets") or []
     if payload.get("status") == "success" and tweets:
@@ -90,6 +118,24 @@ def fetch_tweet(tweet_id: str, api_key: str) -> dict[str, Any]:
 def media_items(tweet: dict[str, Any]) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     seen: set[str] = set()
+    top_level_media = tweet.get("media")
+    if isinstance(top_level_media, list):
+        for item in top_level_media:
+            if not isinstance(item, dict):
+                continue
+            item_key = str(
+                item.get("media_key")
+                or item.get("mediaKey")
+                or item.get("id_str")
+                or item.get("url")
+                or item.get("mediaUrl")
+                or id(item)
+            )
+            if item_key in seen:
+                continue
+            seen.add(item_key)
+            items.append(item)
+
     for container_key in ("extendedEntities", "extended_entities"):
         container = tweet.get(container_key)
         if not isinstance(container, dict):
@@ -123,7 +169,31 @@ def normalized_bitrate(value: Any) -> int:
         return 0
 
 
+def direct_mp4_variant(media: dict[str, Any]) -> dict[str, Any] | None:
+    media_type = str(media.get("type") or "").lower()
+    if media_type not in {"animated_gif", "video"}:
+        return None
+
+    url = media.get("mediaUrl") or media.get("url")
+    if not isinstance(url, str):
+        return None
+
+    parsed = urllib.parse.urlparse(url)
+    if not parsed.path.lower().endswith(".mp4"):
+        return None
+
+    return {
+        "content_type": "video/mp4",
+        "url": url,
+        "bitrate": media.get("bitrate"),
+    }
+
+
 def best_mp4_variant(media: dict[str, Any]) -> dict[str, Any] | None:
+    direct_variant = direct_mp4_variant(media)
+    if direct_variant is not None:
+        return direct_variant
+
     video_info = media.get("video_info")
     if not isinstance(video_info, dict):
         return None
@@ -241,10 +311,12 @@ def download_tweet_media(
     first_only: bool,
     overwrite: bool,
     api_key: str | None,
+    api_provider: str | None = None,
 ) -> dict[str, Any]:
     tweet_id = extract_tweet_id(tweet_input)
-    key = get_api_key(api_key)
-    tweet = fetch_tweet(tweet_id, key)
+    provider = normalize_api_provider(api_provider)
+    key = get_api_key(api_key, provider)
+    tweet = fetch_tweet(tweet_id, key, provider)
     videos = downloadable_videos(tweet)
     if first_only:
         videos = videos[:1]
@@ -274,7 +346,7 @@ def download_tweet_media(
         "kind": "media_download",
         "tweet_id": tweet_id,
         "files": files,
-        "source": "twitterapi.io",
+        "source": provider_source_name(provider),
     }
 
 
@@ -288,6 +360,7 @@ def main() -> int:
             first_only=args.first,
             overwrite=args.overwrite,
             api_key=args.api_key,
+            api_provider=args.api_provider,
         )
         json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
         sys.stdout.write("\n")

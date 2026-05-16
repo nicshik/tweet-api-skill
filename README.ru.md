@@ -3,13 +3,13 @@
 [![CI](https://github.com/nicshik/tweet-api-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/nicshik/tweet-api-skill/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Портативный навык и вспомогательные скрипты для работы с X (Twitter) через `twitterapi.io`.
+Портативный навык и вспомогательные скрипты для работы с X (Twitter) через `twitterapi.io`, с опциональной поддержкой Xquik.
 
 [🇬🇧 Read in English](README.md)
 
 ## Обзор
 
-Этот репозиторий упаковывает переиспользуемый навык и терминальные команды для чтения твитов, X Articles, скачивания видео из твитов и вызова других документированных методов `twitterapi.io` без зависимости от прямого отображения `x.com`.
+Этот репозиторий упаковывает переиспользуемый навык и терминальные команды для чтения твитов, X Articles, скачивания видео из твитов и вызова документированных методов провайдеров без зависимости от прямого отображения `x.com`.
 
 Он подходит, если вам нужны:
 
@@ -17,7 +17,7 @@
 - простые команды `xread`, `xapi` и `xmedia`;
 - стабильный способ получать данные из X для исследований, кратких пересказов и структурированного извлечения.
 
-Проект не связан с X Corp., Twitter или `twitterapi.io`.
+Проект не связан с X Corp., Twitter, `twitterapi.io` или Xquik.
 
 Сопровождающий: [`nicshik`](https://github.com/nicshik).
 
@@ -34,7 +34,7 @@
 
 - Python 3.10 или новее.
 - `zsh`, `rsync` и `install` для `install_portable.sh`.
-- API-ключ `twitterapi.io`.
+- API-ключ `twitterapi.io` или API-ключ Xquik при использовании `--api-provider xquik`.
 
 ## Установка
 
@@ -56,6 +56,12 @@ printf '%s\n' 'TWITTERAPI_IO_KEY=your_key_here' > ~/.codex/skills/twitterapi-x-r
 
 Если в вашем shell путь `~/.local/bin` ещё не добавлен в `PATH`, добавьте его.
 
+Чтобы использовать Xquik как провайдера, добавьте:
+
+```bash
+printf '%s\n' 'X_API_PROVIDER=xquik' 'XQUIK_API_KEY=your_key_here' > ~/.codex/skills/twitterapi-x-reader/.env.local
+```
+
 ### Пакетная установка командной строки
 
 Если нужны только команды `xread`, `xapi` и `xmedia`, установите пакет напрямую:
@@ -64,7 +70,7 @@ printf '%s\n' 'TWITTERAPI_IO_KEY=your_key_here' > ~/.codex/skills/twitterapi-x-r
 python -m pip install "git+https://github.com/nicshik/tweet-api-skill.git"
 ```
 
-Пакетная установка не устанавливает файлы навыка Codex. Для авторизации используйте `TWITTERAPI_IO_KEY` или `--api-key`.
+Пакетная установка не устанавливает файлы навыка Codex. Для авторизации используйте `TWITTERAPI_IO_KEY`, `XQUIK_API_KEY` или `--api-key`.
 
 ## Быстрый старт
 
@@ -94,7 +100,14 @@ xmedia "https://x.com/Yoda4ever/status/2049680135658336270?s=20" --output-dir ./
 xapi --method GET --path /oapi/my/info --query-json '{}'
 ```
 
-По умолчанию `xapi` принимает официальные пути API. Полные URL разрешены только для `https://api.twitterapi.io`, чтобы API-ключ не отправлялся на произвольные хосты.
+По умолчанию `xapi` принимает официальные пути API. Полные URL разрешены только для базового URL выбранного провайдера, чтобы API-ключ не отправлялся на произвольные хосты.
+
+Для Xquik явно выберите провайдера:
+
+```bash
+xread "2046570503801119055" --mode tweet --api-provider xquik
+xapi --api-provider xquik --method GET --path /x/tweets/search --query-json '{"q":"from:xquikcom"}'
+```
 
 Изменяющие HTTP-методы заблокированы без флага `--allow-mutation`:
 
@@ -215,6 +228,13 @@ xmedia "https://x.com/Yoda4ever/status/2049680135658336270?s=20" --output-dir ./
 
 ```text
 TWITTERAPI_IO_KEY=your_key_here
+```
+
+Для Xquik:
+
+```text
+X_API_PROVIDER=xquik
+XQUIK_API_KEY=your_key_here
 ```
 
 Скрипты также принимают `--api-key`, но переменные окружения или `.env.local` предпочтительнее: аргументы командной строки могут попадать в историю shell.
