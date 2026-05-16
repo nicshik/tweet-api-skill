@@ -1,6 +1,6 @@
 ---
 name: twitterapi-x-reader
-description: Portable workflow for using twitterapi.io official endpoints for X or Twitter reads, articles, video downloads, search, user data, communities, lists, spaces, trends, streams, webhook rules, and explicitly requested write actions.
+description: Portable workflow for using supported X or Twitter API providers for reads, articles, video downloads, search, user data, communities, lists, spaces, trends, streams, webhook rules, and explicitly requested write actions.
 license: MIT
 metadata:
   category: research
@@ -9,13 +9,13 @@ metadata:
     - cap.research.twitter_article_parse
   distribution_scope: public
   invocation_strategy: explicit
-  version: v0.4.2
+  version: v0.4.3
   source_of_truth: github:nicshik/tweet-api-skill
 ---
 
 # TwitterAPI X Reader
 
-Use this skill when you need reliable access to X or Twitter data through `twitterapi.io`, especially:
+Use this skill when you need reliable access to X or Twitter data through `twitterapi.io` or Xquik, especially:
 
 - tweet details by URL or id;
 - long-form X Articles linked from a tweet;
@@ -28,12 +28,13 @@ Use this skill when you need reliable access to X or Twitter data through `twitt
 - explicitly requested write actions like posting, liking, retweeting, bookmarking, following, or community replies;
 - structured JSON for later analysis, summarization, or automation.
 
-This skill is intentionally explicit-only because `twitterapi.io` consumes paid credits and also exposes mutating endpoints.
+This skill is intentionally explicit-only because provider APIs can consume paid credits and may expose mutating endpoints.
 
 ## Preconditions
 
 - Preferred: `TWITTERAPI_IO_KEY` is present in the environment.
 - Supported fallback: a local `.env.local` file next to the installed skill, containing `TWITTERAPI_IO_KEY=...`.
+- Optional Xquik provider: set `X_API_PROVIDER=xquik` and `XQUIK_API_KEY=...`, or pass `--api-provider xquik`.
 - If neither source exists, the skill must stop and ask for local configuration rather than requesting the secret in output.
 
 ## Default Flow
@@ -47,7 +48,7 @@ This skill is intentionally explicit-only because `twitterapi.io` consumes paid 
 3. For downloading tweet video files, run `scripts/twitterapi_media.py`.
 4. For any other documented endpoint, run `scripts/twitterapi_call.py` with the official method, path, and query/body payload.
 5. Inspect the JSON and summarize or transform it for the user.
-6. Mention when the result came from `twitterapi.io` rather than direct X rendering.
+6. Mention which provider returned the result rather than implying direct X rendering.
 
 ## Coverage
 
@@ -70,13 +71,15 @@ At minimum, the workflow must remain ready for these method groups:
 - webhook and websocket rule management;
 - stream endpoints.
 
+When `--api-provider xquik` is selected, use Xquik API paths such as `/x/tweets`, `/x/tweets/search`, `/x/users/{id}`, `/x/users/{id}/tweets`, `/x/users/{id}/followers`, and `/x/articles/{tweetId}`.
+
 ## Input Rules
 
 - Preferred input for tweet-centric work: full tweet URL like `https://x.com/user/status/123`.
 - Also allowed: raw tweet id.
 - Do not treat `x.com/i/article/<id>` as sufficient input by itself; the API article endpoint expects the parent tweet id.
 - For generic endpoint usage, prefer exact official paths from the docs.
-- If a full URL is used instead of a path, it must stay under `https://api.twitterapi.io`; do not send the API key to arbitrary hosts.
+- If a full URL is used instead of a path, it must stay under the selected provider base URL: `https://api.twitterapi.io` by default, or `https://xquik.com/api/v1` for Xquik. Do not send the API key to arbitrary hosts.
 
 ## Command Patterns
 
@@ -92,6 +95,8 @@ At minimum, the workflow must remain ready for these method groups:
   - `python3 scripts/twitterapi_call.py --method GET --path "<official-path>" --query-json '{"key":"value"}'`
 - Generic documented POST endpoint:
   - `python3 scripts/twitterapi_call.py --method POST --path "<official-path>" --body-json '{"key":"value"}' --allow-mutation`
+- Xquik tweet search:
+  - `python3 scripts/twitterapi_call.py --api-provider xquik --method GET --path "/x/tweets/search" --query-json '{"q":"from:xquikcom"}'`
 - Generic documented PATCH or DELETE endpoint:
   - `python3 scripts/twitterapi_call.py --method PATCH --path "<official-path>" --body-json '{...}' --allow-mutation`
   - `python3 scripts/twitterapi_call.py --method DELETE --path "<official-path>" --query-json '{...}' --allow-mutation`
@@ -119,6 +124,7 @@ Use `--first` to download only the first video media item, `--filename name.mp4`
 - Prefer `twitterapi_call.py` for every other official endpoint.
 - Use raw official paths from the docs if no local shorthand exists.
 - Keep the skill aligned with the docs instead of inventing unofficial endpoint names.
+- For Xquik reads, use Xquik paths only when `--api-provider xquik` is selected.
 
 ## Safety And Cost Rules
 

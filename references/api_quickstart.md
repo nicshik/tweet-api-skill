@@ -1,4 +1,4 @@
-# twitterapi.io Quickstart
+# Provider API Quickstart
 
 Official docs used for this skill:
 
@@ -7,10 +7,11 @@ Official docs used for this skill:
 - Authentication: `https://docs.twitterapi.io/authentication`
 - Get Tweets by IDs: `https://docs.twitterapi.io/api-reference/endpoint/get_tweet_by_ids`
 - Get Article: `https://docs.twitterapi.io/api-reference/endpoint/get_article`
+- Xquik API overview: `https://docs.xquik.com/api-reference/overview`
 
 ## Auth
 
-Every request requires header:
+The default `twitterapi.io` provider requires header:
 
 ```text
 X-API-Key: <api-key>
@@ -20,6 +21,19 @@ This skill expects the key in:
 
 ```text
 TWITTERAPI_IO_KEY
+```
+
+The optional Xquik provider requires header:
+
+```text
+x-api-key: <api-key>
+xquik-api-contract: 2026-04-29
+```
+
+This skill expects the Xquik key in:
+
+```text
+XQUIK_API_KEY
 ```
 
 Fallback for a personal local install:
@@ -36,22 +50,40 @@ Fallback for a personal local install:
 
 ## Examples
 
-### Tweet details
+### Tweet details with twitterapi.io
 
 ```text
 GET /twitter/tweets?tweet_ids=<id>
 ```
 
-### X Article by parent tweet id
+### X Article by parent tweet id with twitterapi.io
 
 ```text
 GET /twitter/article?tweet_id=<id>
 ```
 
-### Generic documented call
+### Tweet details with Xquik
+
+```text
+GET /x/tweets?ids=<id>
+```
+
+### X Article by parent tweet id with Xquik
+
+```text
+GET /x/articles/<id>
+```
+
+### Generic documented twitterapi.io call
 
 ```text
 python3 scripts/twitterapi_call.py --method GET --path /twitter/tweets --query-json '{"tweet_ids":"123"}'
+```
+
+### Generic Xquik call
+
+```text
+python3 scripts/twitterapi_call.py --api-provider xquik --method GET --path /x/tweets --query-json '{"ids":"123"}'
 ```
 
 ## Notes

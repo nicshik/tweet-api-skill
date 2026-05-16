@@ -56,6 +56,42 @@ class TwitterApiCallCliTests(unittest.TestCase):
             api_key="api-key",
             query={"sample": True},
             body=None,
+            api_provider="twitterapi_io",
+        )
+
+    def test_get_calls_xquik_endpoint_when_provider_selected(self) -> None:
+        with mock.patch.object(
+            twitterapi_call, "get_api_key", return_value="api-key"
+        ) as get_api_key, mock.patch.object(
+            twitterapi_call,
+            "request_json",
+            return_value={"tweets": [{"id": "123"}]},
+        ) as request_json:
+            code, stdout, stderr = run_cli(
+                twitterapi_call.main,
+                [
+                    "xapi",
+                    "--api-provider",
+                    "xquik",
+                    "--method",
+                    "get",
+                    "--path",
+                    "/x/tweets",
+                    "--query-json",
+                    '{"ids": "123"}',
+                ],
+            )
+
+        self.assertEqual(code, 0, stderr)
+        self.assertIn('"tweets"', stdout)
+        get_api_key.assert_called_once_with(None, "xquik")
+        request_json.assert_called_once_with(
+            method="GET",
+            path="/x/tweets",
+            api_key="api-key",
+            query={"ids": "123"},
+            body=None,
+            api_provider="xquik",
         )
 
     def test_rejects_mutating_methods_without_explicit_flag(self) -> None:
@@ -112,6 +148,7 @@ class TwitterApiCallCliTests(unittest.TestCase):
             api_key="api-key",
             query={},
             body={"text": "draft"},
+            api_provider="twitterapi_io",
         )
 
     def test_invalid_query_json_fails_before_request(self) -> None:
@@ -154,7 +191,33 @@ class TwitterApiFetchCliTests(unittest.TestCase):
 
         self.assertEqual(code, 0, stderr)
         self.assertIn('"kind": "tweet"', stdout)
-        fetch_tweet.assert_called_once_with("123", "api-key")
+        fetch_tweet.assert_called_once_with("123", "api-key", "twitterapi_io")
+
+    def test_tweet_mode_passes_xquik_provider(self) -> None:
+        with mock.patch.object(
+            twitterapi_fetch, "get_api_key", return_value="api-key"
+        ) as get_api_key, mock.patch.object(
+            twitterapi_fetch,
+            "fetch_tweet",
+            return_value={"kind": "tweet", "tweet_id": "123", "source": "xquik"},
+        ) as fetch_tweet:
+            code, stdout, stderr = run_cli(
+                twitterapi_fetch.main,
+                [
+                    "xread",
+                    "--api-provider",
+                    "xquik",
+                    "--input",
+                    "123",
+                    "--mode",
+                    "tweet",
+                ],
+            )
+
+        self.assertEqual(code, 0, stderr)
+        self.assertIn('"source": "xquik"', stdout)
+        get_api_key.assert_called_once_with(None, "xquik")
+        fetch_tweet.assert_called_once_with("123", "api-key", "xquik")
 
     def test_auto_mode_falls_back_from_article_to_tweet(self) -> None:
         with mock.patch.object(
@@ -175,8 +238,8 @@ class TwitterApiFetchCliTests(unittest.TestCase):
 
         self.assertEqual(code, 0, stderr)
         self.assertIn('"tweet_id": "123"', stdout)
-        fetch_article.assert_called_once_with("123", "api-key")
-        fetch_tweet.assert_called_once_with("123", "api-key")
+        fetch_article.assert_called_once_with("123", "api-key", "twitterapi_io")
+        fetch_tweet.assert_called_once_with("123", "api-key", "twitterapi_io")
 
 
 class TwitterApiMediaTests(unittest.TestCase):
@@ -258,10 +321,60 @@ class TwitterApiMediaTests(unittest.TestCase):
             path="/twitter/tweets",
             query={"tweet_ids": "2049680135658336270"},
             api_key="api-key",
+            api_provider="twitterapi_io",
         )
         download_file.assert_called_once()
         self.assertIn("1280x720", download_file.call_args.args[0])
         self.assertEqual(download_file.call_args.kwargs, {"overwrite": False})
+
+    def test_downloads_xquik_media_url(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir, mock.patch.object(
+            twitterapi_media, "get_api_key", return_value="api-key"
+        ) as get_api_key, mock.patch.object(
+            twitterapi_media,
+            "request_json",
+            return_value={
+                "tweets": [
+                    {
+                        "media": [
+                            {
+                                "type": "video",
+                                "mediaUrl": "https://video.twimg.com/amplify_video/1/vid/avc1/1280x720/high.mp4?tag=21",
+                            }
+                        ]
+                    }
+                ]
+            },
+        ) as request_json, mock.patch.object(
+            twitterapi_media,
+            "download_file",
+            return_value=321,
+        ) as download_file:
+            code, stdout, stderr = run_cli(
+                twitterapi_media.main,
+                [
+                    "xmedia",
+                    "2049680135658336270",
+                    "--api-provider",
+                    "xquik",
+                    "--output-dir",
+                    temp_dir,
+                ],
+            )
+
+        self.assertEqual(code, 0, stderr)
+        result = json.loads(stdout)
+        self.assertEqual(result["source"], "xquik")
+        self.assertEqual(result["files"][0]["bytes"], 321)
+        get_api_key.assert_called_once_with(None, "xquik")
+        request_json.assert_called_once_with(
+            method="GET",
+            path="/x/tweets",
+            query={"ids": "2049680135658336270"},
+            api_key="api-key",
+            api_provider="xquik",
+        )
+        self.assertIn("1280x720", download_file.call_args.args[0])
 
     def test_errors_when_tweet_has_no_video_variants(self) -> None:
         with mock.patch.object(

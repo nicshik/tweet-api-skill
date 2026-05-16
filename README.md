@@ -3,13 +3,13 @@
 [![CI](https://github.com/nicshik/tweet-api-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/nicshik/tweet-api-skill/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Portable skill and helper scripts for working with X (Twitter) through `twitterapi.io`.
+Portable skill and helper scripts for working with X (Twitter) through `twitterapi.io`, with optional Xquik provider support.
 
 [🇷🇺 Читать на русском](README.ru.md)
 
 ## Overview
 
-This repository packages a reusable skill plus terminal helpers for reading tweets, X Articles, downloading tweet videos, and calling other documented `twitterapi.io` endpoints without relying on direct `x.com` rendering.
+This repository packages a reusable skill plus terminal helpers for reading tweets, X Articles, downloading tweet videos, and calling documented provider endpoints without relying on direct `x.com` rendering.
 
 It is designed for people who want:
 
@@ -17,7 +17,7 @@ It is designed for people who want:
 - simple terminal commands like `xread`, `xapi`, and `xmedia`;
 - a stable path for research, summarization, and structured extraction from X.
 
-This project is not affiliated with X Corp., Twitter, or `twitterapi.io`.
+This project is not affiliated with X Corp., Twitter, `twitterapi.io`, or Xquik.
 
 Maintainer: [`nicshik`](https://github.com/nicshik).
 
@@ -34,7 +34,7 @@ Maintainer: [`nicshik`](https://github.com/nicshik).
 
 - Python 3.10 or newer
 - `zsh`, `rsync`, and `install` for `install_portable.sh`
-- a `twitterapi.io` API key
+- a `twitterapi.io` API key, or an Xquik API key when using `--api-provider xquik`
 
 ## Installation
 
@@ -55,6 +55,12 @@ printf '%s\n' 'TWITTERAPI_IO_KEY=your_key_here' > ~/.codex/skills/twitterapi-x-r
 ```
 
 If your shell does not already include `~/.local/bin` in `PATH`, add it.
+
+To use Xquik as the provider instead, add:
+
+```bash
+printf '%s\n' 'X_API_PROVIDER=xquik' 'XQUIK_API_KEY=your_key_here' > ~/.codex/skills/twitterapi-x-reader/.env.local
+```
 
 ### CLI Package Install
 
@@ -94,7 +100,14 @@ Call any documented endpoint:
 xapi --method GET --path /oapi/my/info --query-json '{}'
 ```
 
-`xapi` accepts official API paths by default. Full URLs are only accepted for `https://api.twitterapi.io` so the API key is not sent to arbitrary hosts.
+`xapi` accepts official API paths by default. Full URLs are only accepted for the selected provider base URL so the API key is not sent to arbitrary hosts.
+
+Use Xquik explicitly for Xquik paths:
+
+```bash
+xread "2046570503801119055" --mode tweet --api-provider xquik
+xapi --api-provider xquik --method GET --path /x/tweets/search --query-json '{"q":"from:xquikcom"}'
+```
 
 Mutating HTTP methods are blocked unless you pass `--allow-mutation`:
 
@@ -215,6 +228,13 @@ Example:
 
 ```text
 TWITTERAPI_IO_KEY=your_key_here
+```
+
+For Xquik, use:
+
+```text
+X_API_PROVIDER=xquik
+XQUIK_API_KEY=your_key_here
 ```
 
 The scripts also accept `--api-key`, but environment variables or `.env.local` are preferred because command-line arguments can be recorded in shell history.
